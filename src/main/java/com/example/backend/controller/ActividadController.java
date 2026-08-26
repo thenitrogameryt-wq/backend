@@ -11,7 +11,7 @@ import java.util.List;
 @CrossOrigin(
         origins = {
                 "http://localhost:5173",
-                "https://frontend-fdgz-phi.vercel.app",
+                "https://frontend-fdgz-phi-nu.vercel.app",
                 "https://hoppscotch.io"
         },
         allowCredentials = "true"

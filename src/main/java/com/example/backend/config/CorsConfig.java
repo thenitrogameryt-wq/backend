@@ -14,7 +14,7 @@ public class CorsConfig implements WebMvcConfigurer {
                 .allowedOrigins(
                         "http://localhost:5173",
                         "http://localhost:8080",
-                        "https://frontend-fdgz-phi.vercel.app",
+                        "https://frontend-fdgz-phi-nu.vercel.app",
                         "https://hoppscotch.io"
                 )
                 .allowedMethods(

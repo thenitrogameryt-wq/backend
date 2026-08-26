@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @CrossOrigin(
         origins = {"http://localhost:5173",
-                "https://frontend-fdgz-phi.vercel.app"
+                "https://frontend-fdgz-phi-nu.vercel.app"
         },
         allowCredentials = "true"
 )
