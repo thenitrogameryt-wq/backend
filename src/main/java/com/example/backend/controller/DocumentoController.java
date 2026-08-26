@@ -11,6 +11,7 @@ import com.mongodb.client.MongoDatabase;
 import jakarta.servlet.http.HttpSession;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,6 +42,9 @@ public class DocumentoController {
 
     @Autowired
     private DocumentoService service;
+
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
     @Autowired
     private AuthService authService;
@@ -168,10 +172,10 @@ public class DocumentoController {
 
     @GetMapping("/documentos")
     public List<Document> documentos() {
-        MongoClient client = MongoClients.create( "mongodb+srv://thenitrogameryt_db_user:<db_password>@despliegue.occ9ti7.mongodb.net/?appName=Despliegue" );
-        MongoDatabase db = client.getDatabase( "Ascope_BD" );
-        MongoCollection<Document> collection = db.getCollection( "ascope_bd" );
-        return collection.find() .into(new ArrayList<>());
+        return mongoTemplate
+                .getCollection("ascope_bd")
+                .find()
+                .into(new ArrayList<>());
     }
 
     @GetMapping("/archivo/{nombre:.+}")
