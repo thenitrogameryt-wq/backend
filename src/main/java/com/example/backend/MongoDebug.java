@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class MongoDebug implements CommandLineRunner {
 
-    @Value("${spring.data.mongodb.uri}")
+    @Value("${spring.mongodb.uri}")
     private String mongoUri;
 
     @Override
