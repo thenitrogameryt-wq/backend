@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/usuarios")
 @CrossOrigin(
-        origins = "http://localhost:5173",
+        origins = {"http://localhost:5173",
+                "https://frontend-fdgz-phi.vercel.app"
+        },
         allowCredentials = "true"
 )
 public class UsuarioController {

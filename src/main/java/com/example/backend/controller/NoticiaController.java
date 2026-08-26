@@ -19,7 +19,9 @@ import java.util.List;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @CrossOrigin(
-        origins = "http://localhost:5173",
+        origins = {"http://localhost:5173",
+                "https://frontend-fdgz-phi.vercel.app"
+        },
         allowCredentials = "true"
 )
 @RestController

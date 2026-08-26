@@ -35,7 +35,9 @@ import java.nio.file.Paths;
 @RestController
 @RequestMapping("/documentos")
 @CrossOrigin(
-        origins = "http://localhost:5173",
+        origins = {"http://localhost:5173",
+                "https://frontend-fdgz-phi.vercel.app"
+        },
         allowCredentials = "true"
 )
 public class DocumentoController {

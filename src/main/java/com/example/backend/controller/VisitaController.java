@@ -13,8 +13,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/visitas")
 @CrossOrigin(
-        origins = {
-                "http://localhost:5173",
+        origins = {"http://localhost:5173",
+                "https://frontend-fdgz-phi.vercel.app",
                 "https://hoppscotch.io"
         },
         allowCredentials = "true"
