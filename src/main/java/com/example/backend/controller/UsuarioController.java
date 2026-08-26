@@ -169,6 +169,16 @@ public class UsuarioController {
                     .build();
         }
 
+        System.out.println(
+                "VERIFICAR SESSION ID: "
+                        + session.getId()
+        );
+
+        System.out.println(
+                "VERIFICAR USUARIO SESSION: "
+                        + session.getAttribute("usuario")
+        );
+
 
         // -------------------------------------------------
         // SESIÓN VÁLIDA
@@ -240,6 +250,16 @@ public class UsuarioController {
                 usuarioEncontrado.getUsuario(),
                 "Inició sesión",
                 "Autenticación"
+        );
+
+        System.out.println(
+                "LOGIN SESSION ID: "
+                        + session.getId()
+        );
+
+        System.out.println(
+                "LOGIN USUARIO SESSION: "
+                        + session.getAttribute("usuario")
         );
 
 
