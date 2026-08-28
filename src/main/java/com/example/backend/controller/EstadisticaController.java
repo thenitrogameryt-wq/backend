@@ -3,6 +3,7 @@ package com.example.backend.controller;
 import com.example.backend.dto.EstadisticasDTO;
 import com.example.backend.service.EstadisticaService;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,12 +21,10 @@ import org.springframework.web.bind.annotation.RestController;
 )
 public class EstadisticaController {
 
-    private final EstadisticaService service;
+    private final EstadisticaService estadisticaService;
 
-    public EstadisticaController(
-            EstadisticaService service) {
-
-        this.service = service;
+    public EstadisticaController(EstadisticaService estadisticaService) {
+        this.estadisticaService = estadisticaService;
     }
 
     // =====================================================
@@ -33,21 +32,11 @@ public class EstadisticaController {
     // =====================================================
 
     @GetMapping
-    public EstadisticasDTO obtenerEstadisticas(
+    public ResponseEntity<EstadisticasDTO> obtenerEstadisticas(
+            @RequestParam(defaultValue = "2026") int anio,
+            @RequestParam(defaultValue = "todo") String periodo) {
 
-            @RequestParam(
-                    defaultValue = "2026"
-            )
-            int anio,
-
-            @RequestParam(
-                    defaultValue = "todo"
-            )
-            String periodo) {
-
-        return service.obtenerEstadisticas(
-                anio,
-                periodo
-        );
+        EstadisticasDTO dto = estadisticaService.obtenerEstadisticas(anio, periodo);
+        return ResponseEntity.ok(dto);
     }
 }

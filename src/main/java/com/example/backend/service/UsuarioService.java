@@ -1,6 +1,7 @@
 package com.example.backend.service;
 
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,6 +13,7 @@ import com.example.backend.dto.CambiarPasswordRequest;
 import com.example.backend.entidades.Rol;
 import com.example.backend.entidades.Usuario;
 import com.example.backend.repository.UsuarioRepository;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class UsuarioService {
@@ -92,9 +94,9 @@ public class UsuarioService {
         return repository.save(usuario);
     }
 
-    // =====================================================
-    // ACTUALIZAR USUARIO
-    // =====================================================
+// =====================================================
+// ACTUALIZAR USUARIO
+// =====================================================
 
     public Usuario actualizar(
             String id,
@@ -113,9 +115,25 @@ public class UsuarioService {
         actual.setUsuario(datos.getUsuario());
         actual.setRol(datos.getRol());
 
+        // =================================================
+        // ACTUALIZAR FOTO DE PERFIL
+        // =================================================
+
+        if (datos.getFotoPerfil() != null &&
+                !datos.getFotoPerfil().isBlank()) {
+
+            actual.setFotoPerfil(
+                    datos.getFotoPerfil()
+            );
+        }
+
         actual.setFechaActualizacion(
                 LocalDateTime.now()
         );
+
+        // =================================================
+        // FOTO POR DEFECTO
+        // =================================================
 
         if (actual.getFotoPerfil() == null ||
                 actual.getFotoPerfil().isBlank()) {
@@ -127,6 +145,7 @@ public class UsuarioService {
 
         return repository.save(actual);
     }
+
 
     // =====================================================
     // ACTUALIZAR PERFIL
@@ -349,4 +368,120 @@ public class UsuarioService {
             }
         }
     }
+
+    // =====================================================
+    // ACTUALIZAR FOTO DE PERFIL
+    // =====================================================
+
+    public Usuario actualizarFotoPerfil(
+            String id,
+            MultipartFile foto) throws Exception {
+
+        System.out.println("======================================");
+        System.out.println("📸 ACTUALIZAR FOTO - SERVICE");
+        System.out.println("======================================");
+
+        System.out.println("🆔 Buscando usuario: " + id);
+
+        Usuario usuario =
+                repository.findById(id)
+                        .orElseThrow(
+                                () -> new RuntimeException(
+                                        "Usuario no encontrado"
+                                )
+                        );
+
+        System.out.println(
+                "👤 Usuario encontrado: "
+                        + usuario.getUsuario()
+        );
+
+        // -------------------------------------------------
+        // VALIDAR ARCHIVO
+        // -------------------------------------------------
+
+        if (foto == null || foto.isEmpty()) {
+
+            throw new RuntimeException(
+                    "La imagen está vacía."
+            );
+        }
+
+        // -------------------------------------------------
+        // VALIDAR TIPO
+        // -------------------------------------------------
+
+        String contentType =
+                foto.getContentType();
+
+        if (contentType == null ||
+                !contentType.startsWith("image/")) {
+
+            throw new RuntimeException(
+                    "El archivo seleccionado no es una imagen."
+            );
+        }
+
+        // -------------------------------------------------
+        // CONVERTIR A BASE64
+        // -------------------------------------------------
+
+        byte[] bytes =
+                foto.getBytes();
+
+        String base64 =
+                Base64.getEncoder()
+                        .encodeToString(bytes);
+
+        String fotoBase64 =
+                "data:" +
+                        contentType +
+                        ";base64," +
+                        base64;
+
+        System.out.println(
+                "📦 Bytes convertidos: "
+                        + bytes.length
+        );
+
+        System.out.println(
+                "📏 Base64 generado: "
+                        + fotoBase64.length()
+                        + " caracteres"
+        );
+
+        // -------------------------------------------------
+        // GUARDAR
+        // -------------------------------------------------
+
+        usuario.setFotoPerfil(
+                fotoBase64
+        );
+
+        usuario.setFechaActualizacion(
+                LocalDateTime.now()
+        );
+
+        Usuario guardado =
+                repository.save(usuario);
+
+        System.out.println(
+                "💾 Foto guardada en MongoDB."
+        );
+
+        System.out.println(
+                "🖼️ Longitud fotoPerfil guardada: "
+                        + (
+                        guardado.getFotoPerfil() != null
+                                ? guardado.getFotoPerfil().length()
+                                : 0
+                )
+        );
+
+        System.out.println("======================================");
+
+        return guardado;
+    }
+
+
 }

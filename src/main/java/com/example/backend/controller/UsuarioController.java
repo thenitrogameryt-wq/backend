@@ -418,4 +418,58 @@ public class UsuarioController {
 
         return ResponseEntity.ok().build();
     }
+
+    // =====================================================
+    // CAMBIAR FOTO DE PERFIL
+    // =====================================================
+
+    @PutMapping("/{id}/foto")
+    public ResponseEntity<?> cambiarFotoPerfil(
+            @PathVariable String id,
+            @RequestParam("foto") org.springframework.web.multipart.MultipartFile foto) {
+
+        System.out.println("======================================");
+        System.out.println("📸 CAMBIO DE FOTO - BACKEND");
+        System.out.println("======================================");
+
+        System.out.println("🆔 ID recibido: " + id);
+
+        if (foto == null || foto.isEmpty()) {
+
+            System.out.println("❌ No se recibió ningún archivo.");
+
+            return ResponseEntity
+                    .badRequest()
+                    .body("No se recibió ninguna imagen.");
+        }
+
+        System.out.println("📄 Nombre: " + foto.getOriginalFilename());
+        System.out.println("📦 Tamaño: " + foto.getSize());
+        System.out.println("🖼️ Tipo: " + foto.getContentType());
+
+        try {
+
+            Usuario usuarioActualizado =
+                    service.actualizarFotoPerfil(id, foto);
+
+            System.out.println("✅ Foto actualizada correctamente.");
+            System.out.println("🆔 Usuario: " + usuarioActualizado.getId());
+            System.out.println("👤 Usuario: " + usuarioActualizado.getUsuario());
+
+            System.out.println("======================================");
+
+            return ResponseEntity.ok(usuarioActualizado);
+
+        } catch (Exception error) {
+
+            System.out.println("❌ ERROR ACTUALIZANDO FOTO");
+            error.printStackTrace();
+
+            return ResponseEntity
+                    .internalServerError()
+                    .body("No se pudo actualizar la foto de perfil.");
+        }
+    }
+
+
 }
