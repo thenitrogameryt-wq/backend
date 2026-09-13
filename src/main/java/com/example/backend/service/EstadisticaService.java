@@ -56,31 +56,31 @@ public class EstadisticaService {
 
         // 2. FILTRAR POR PERIODO SELECCIONADO (TARJETAS SUPERIORES)
         List<Usuario> usuariosPeriodo = usuarios.stream()
-                .filter(u -> u.getFechaRegistro() != null && perteneceAlPeriodo(u.getFechaRegistro(), anio, periodo))
+                .filter(u -> perteneceAlPeriodo(u.getFechaRegistro(), anio, periodo))
                 .toList();
 
         List<Visita> visitasPeriodo = visitas.stream()
-                .filter(v -> obtenerFechaVisita(v) != null && perteneceAlPeriodo(obtenerFechaVisita(v), anio, periodo))
+                .filter(v -> perteneceAlPeriodo(obtenerFechaVisita(v), anio, periodo))
                 .toList();
 
         // Eventos en Agenda = Actividades programadas
         List<Agenda> agendasPeriodo = agendas.stream()
-                .filter(a -> a.getFecha() != null && perteneceAlPeriodo(a.getFecha(), anio, periodo))
+                .filter(a -> perteneceAlPeriodo(a.getFecha(), anio, periodo))
                 .toList();
 
         List<Documento> documentosPeriodo = documentos.stream()
-                .filter(d -> d.getFechaPublicacion() != null && perteneceAlPeriodo(d.getFechaPublicacion(), anio, periodo))
+                .filter(d -> perteneceAlPeriodo(d.getFechaPublicacion(), anio, periodo))
                 .toList();
 
         List<Noticia> noticiasPeriodo = noticias.stream()
-                .filter(n -> n.getFechaPublicacion() != null && perteneceAlPeriodo(n.getFechaPublicacion(), anio, periodo))
+                .filter(n -> perteneceAlPeriodo(n.getFechaPublicacion(), anio, periodo))
                 .toList();
 
         // 3. SETEAR TARJETAS SUPERIORES
         resultado.setUsuariosRegistrados(usuariosPeriodo.size());
         resultado.setUsuariosActivos(usuarios.stream().filter(Usuario::isActivo).count());
         resultado.setVisitasRegistradas(visitasPeriodo.size());
-        resultado.setActividadesProgramadas(agendasPeriodo.size()); // Asigna conteo de Agendas
+        resultado.setActividadesProgramadas(agendasPeriodo.size());
         resultado.setDocumentosPublicados(documentosPeriodo.size());
         resultado.setNoticiasPublicadas(noticiasPeriodo.size());
 
@@ -91,7 +91,7 @@ public class EstadisticaService {
         resultado.setActividadesMensuales(generarActividadesMensuales(anio, actividades));
 
         // 5. VISITAS POR LUGAR
-        resultado.setVisitasPorLugar(generarVisitasPorLugar(visitasPeriodo));
+        resultado.setVisitasPorLugar(generarVisitasPorLugar(visitasPeriodo.isEmpty() ? visitas : visitasPeriodo));
 
         // 6. RESUMEN DEL SISTEMA (ACUMULADO HISTÓRICO)
         resultado.setResumenTotal(new ResumenTotalDTO(
@@ -114,23 +114,21 @@ public class EstadisticaService {
             final int m = mes;
 
             long cantUsuarios = usuarios.stream()
-                    .filter(u -> u.getFechaRegistro() != null && u.getFechaRegistro().getYear() == anio && u.getFechaRegistro().getMonthValue() == m)
+                    .filter(u -> u.getFechaRegistro() != null && coincidirMesAnio(u.getFechaRegistro().toLocalDate(), anio, m))
                     .count();
 
             long cantVisitas = visitas.stream()
                     .map(this::obtenerFechaVisita)
                     .filter(Objects::nonNull)
-                    .filter(f -> f.getYear() == anio && f.getMonthValue() == m)
+                    .filter(f -> coincidirMesAnio(f, anio, m))
                     .count();
 
             long cantDocs = documentos.stream()
-                    .filter(d -> d.getFechaPublicacion() != null)
-                    .filter(d -> d.getFechaPublicacion().getYear() == anio && d.getFechaPublicacion().getMonthValue() == m)
+                    .filter(d -> d.getFechaPublicacion() != null && coincidirMesAnio(d.getFechaPublicacion(), anio, m))
                     .count();
 
             long cantNoticias = noticias.stream()
-                    .filter(n -> n.getFechaPublicacion() != null)
-                    .filter(n -> n.getFechaPublicacion().getYear() == anio && n.getFechaPublicacion().getMonthValue() == m)
+                    .filter(n -> n.getFechaPublicacion() != null && coincidirMesAnio(n.getFechaPublicacion(), anio, m))
                     .count();
 
             lista.add(new RegistroMensualDTO(mes, nombreMes(mes), cantUsuarios, cantVisitas, cantDocs, cantNoticias, 0));
@@ -143,8 +141,7 @@ public class EstadisticaService {
         for (int mes = 1; mes <= 12; mes++) {
             final int m = mes;
             long cantDocs = documentos.stream()
-                    .filter(d -> d.getFechaPublicacion() != null)
-                    .filter(d -> d.getFechaPublicacion().getYear() == anio && d.getFechaPublicacion().getMonthValue() == m)
+                    .filter(d -> d.getFechaPublicacion() != null && coincidirMesAnio(d.getFechaPublicacion(), anio, m))
                     .count();
 
             lista.add(new RegistroMensualDTO(mes, nombreMes(mes), 0, 0, cantDocs, 0, 0));
@@ -157,7 +154,7 @@ public class EstadisticaService {
         for (int mes = 1; mes <= 12; mes++) {
             final int m = mes;
             long cantAgenda = agendas.stream()
-                    .filter(a -> a.getFecha() != null && a.getFecha().getYear() == anio && a.getFecha().getMonthValue() == m)
+                    .filter(a -> a.getFecha() != null && coincidirMesAnio(a.getFecha(), anio, m))
                     .count();
 
             lista.add(new RegistroMensualDTO(mes, nombreMes(mes), 0, 0, 0, 0, cantAgenda));
@@ -170,12 +167,18 @@ public class EstadisticaService {
         for (int mes = 1; mes <= 12; mes++) {
             final int m = mes;
             long cantActividades = actividades.stream()
-                    .filter(a -> a.getFecha() != null && a.getFecha().getYear() == anio && a.getFecha().getMonthValue() == m)
+                    .filter(a -> a.getFecha() != null && coincidirMesAnio(a.getFecha().toLocalDate(), anio, m))
                     .count();
 
             lista.add(new RegistroMensualDTO(mes, nombreMes(mes), 0, 0, 0, 0, cantActividades));
         }
         return lista;
+    }
+
+    private boolean coincidirMesAnio(LocalDate fecha, int anio, int mes) {
+        if (fecha == null) return false;
+        if (anio > 0 && fecha.getYear() != anio) return false;
+        return fecha.getMonthValue() == mes;
     }
 
     private List<VisitaLugarDTO> generarVisitasPorLugar(List<Visita> visitas) {
@@ -192,7 +195,8 @@ public class EstadisticaService {
     }
 
     private boolean perteneceAlPeriodo(LocalDate fecha, int anio, String periodo) {
-        if (fecha == null || fecha.getYear() != anio) return false;
+        if (fecha == null) return false;
+        if (anio > 0 && fecha.getYear() != anio) return false;
         if (periodo == null || periodo.isBlank() || periodo.equalsIgnoreCase("todo")) return true;
         try {
             return fecha.getMonthValue() == Integer.parseInt(periodo);
@@ -206,14 +210,27 @@ public class EstadisticaService {
     }
 
     private LocalDate obtenerFechaVisita(Visita visita) {
-        if (visita == null || visita.getFechaRegistro() == null) return null;
+        if (visita == null || visita.getFechaRegistro() == null || visita.getFechaRegistro().isBlank()) return null;
+        String f = visita.getFechaRegistro().trim();
         try {
-            return LocalDate.parse(visita.getFechaRegistro(), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            return LocalDate.parse(f, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         } catch (DateTimeParseException e) {
             try {
-                return LocalDate.parse(visita.getFechaRegistro(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                return LocalDate.parse(f, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
             } catch (DateTimeParseException ex) {
-                return null;
+                try {
+                    return LocalDateTime.parse(f).toLocalDate();
+                } catch (Exception ex2) {
+                    try {
+                        return LocalDate.parse(f.split("T")[0]);
+                    } catch (Exception ex3) {
+                        try {
+                            return LocalDate.parse(f.split(" ")[0]);
+                        } catch (Exception ex4) {
+                            return null;
+                        }
+                    }
+                }
             }
         }
     }
